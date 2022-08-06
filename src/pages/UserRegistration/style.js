@@ -5,6 +5,7 @@ export const stylesheet={
         display:'flex',
         justifyContent:'center',
         alignItems:'center',
+        flexDirection:'column !important',
 
     },
 
