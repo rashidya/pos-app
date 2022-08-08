@@ -13,12 +13,13 @@ import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import {TableCell} from "@material-ui/core";
+import {TableCell, Tooltip} from "@material-ui/core";
 import TableBody from "@mui/material/TableBody";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Paper from '@mui/material/Paper';
 import Button from "@mui/material/Button";
+import userRegistrationService from "../../services/userRegistrationService";
 
 class UserRegistration extends Component {
     constructor(props) {
@@ -27,27 +28,185 @@ class UserRegistration extends Component {
         this.state = {
 
 
+            allUsers:[],
             formData: {
-                id: '',
-                userNIC: '',
+                email: "John@gmail.com",
+                username: "johnd",
+                password: "m38rmF$",
                 name: {
-                    firstName: '',
-                    lastName: ''
+                    firstname: "John",
+                    lastname: "Doe"
                 },
-                email:'',
-                drivingLicenseNo: '',
-                address: '',
-                contactNo: '',
-                user: {
-                    userId:'',
-                    userName: '',
-                    password: '',
-                    role: 'REGISTERED_USER'
-                }
+                address: {
+                    city: "kilcoole",
+                    street: "7835 new road",
+                    number: 3,
+                    zipcode: "12926-3874",
+                    geolocation: {
+                        lat: "-37.3159",
+                        long: "81.1496"
+                    }
+                },
+                phone: "1-570-236-7033"
+            },
 
-            }
+            alert: false,
+            message: '',
+            severity: 'error'
         }
     }
+
+
+    submitUser= async() =>{
+
+        let formData = this.state.formData;
+        let res = await userRegistrationService.submitUser(formData);
+
+        if (res.status === 200) {
+            this.setState({
+                alert: true,
+                message: res.data.message,
+                severity: 'success'
+            });
+            await this.loadData();
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    updateUser= async(data) =>{
+
+        let res = await userRegistrationService.putUser(data.id,data);
+
+        if (res.status === 200) {
+            this.setState({
+                alert: true,
+                message: res.data.message,
+                severity: 'success'
+            });
+            await this.loadAllUsers();
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+
+
+    deleteUser= async(data) =>{
+
+        let res = await userRegistrationService.deleteUser(data);
+
+        if (res.status === 200) {
+            this.setState({
+                alert: true,
+                message: res.data.message,
+                severity: 'success'
+            });
+            await this.loadAllUsers();
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    loadAllUsers= async() =>{
+
+        let res = await userRegistrationService.fetchAllUsers();
+
+        if (res.status === 200) {
+            this.setState({
+                allUsers:res.data.data,
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+
+    loadUser= async() =>{
+
+        // let data = this.state.id;
+        let res = await userRegistrationService.fetchASingleUser(/*data*/);
+
+        if (res.status === 200) {
+            let data = res.data.data;
+            this.setState({
+
+                formData: {
+                    email: data.email,
+                    username: data.username,
+                    password: data.password,
+                    name: {
+                        firstname: data.name.firstname,
+                        lastname: data.name.lastname
+                    },
+                    address: {
+                        city: data.address.city,
+                        street: data.address.street,
+                        number: data.address.number,
+                        zipcode: data.address.zipcode,
+                        geolocation: {
+                            lat:data.address.lat,
+                            long:data.address.long
+                        }
+                    },
+                    phone:data.phone
+                }
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+
+    loadUsersLimit= async() =>{
+
+        // let data = this.state.limit;
+        let res = await userRegistrationService.fetchAllUsersLimit(/*data*/);
+
+        if (res.status === 200) {
+            this.setState({
+                allUsers:res.data.data,
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+
+    componentDidMount() {
+        this.loadAllUsers();
+    }
+
 
     render() {
         const {classes} = this.props;
@@ -56,21 +215,27 @@ class UserRegistration extends Component {
                 <Grid className={classes.container}>
 
                     <Box sx={{display: 'flex', flexWrap: 'wrap'}} justifyContent={'center'}>
-                        <ValidatorForm ref="form" className="pt-2" >
+                        <ValidatorForm ref="form" className="pt-2" onSubmit={this.submitUser}>
                             <Grid width="90vw" height={'80vh'} display={'flex'} justifyContent={'space-evenly'}
                                   alignItems={'center'}
                                   style={{backgroundColor: 'white', opacity: '93%'}}>
 
                                 <Grid display={"flex"} width={'75vw'} height={"80vh"} justifyContent={'space-evenly'}
-                                      flexDirection={'column'}  alignItems={'center'}>
+                                      flexDirection={'column'} alignItems={'center'}>
 
-                                    <Grid width={'92%'} display={'flex'} justifyContent={'start'}><Typography marginBottom={'2vh'} style={{fontSize: '35px',}}>User Registration</Typography></Grid>
+                                    <Grid width={'92%'} display={'flex'} justifyContent={'start'}><Typography
+                                        marginBottom={'2vh'} style={{fontSize: '35px',}}>User Registration</Typography></Grid>
 
-                                    <Grid display={"flex"} justifyContent={'center'} height={'75vh'}  alignItems={'center'} marginTop={'5vh'}>
+                                    <Grid display={"flex"} justifyContent={'center'} height={'75vh'}
+                                          alignItems={'center'} marginTop={'5vh'}>
 
                                         <Grid display={'flex'} height={'100%'}>
-                                            <ValidatorForm ref="form" className="pt-2" >
-                                                <div style={{display: 'flex', flexWrap: 'wrap',justifyContent:'center'}}>
+                                            <ValidatorForm ref="form" className="pt-2">
+                                                <div style={{
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
+                                                    justifyContent: 'center'
+                                                }}>
 
                                                     <TextField
                                                         required
@@ -79,12 +244,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
-                                                        /*value={this.state.formData.name.firstName}
+                                                        value={this.state.formData.name.firstname}
                                                         onChange={(e) => {
                                                             let formDataOb = this.state.formData
-                                                            formDataOb.name.firstName = e.target.value
+                                                            formDataOb.name.firstname = e.target.value
                                                             this.setState(formDataOb)
-                                                        }}*/
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -96,6 +261,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.name.lastname}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.name.lastname = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -107,6 +278,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.email}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.email = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -118,13 +295,20 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.username}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.username = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
 
                                                     <FormControl sx={{m: 1, width: '60ch'}}
                                                                  size={"small"} variant="outlined">
-                                                        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                                                        <InputLabel
+                                                            htmlFor="outlined-adornment-password">Password</InputLabel>
                                                         <OutlinedInput
                                                             id="outlined-adornment-password"
                                                             type={this.state.showPassword ? 'text' : 'password'}
@@ -149,10 +333,10 @@ class UserRegistration extends Component {
                                                             }
                                                             label="Password"
 
-                                                            value={this.state.formData.user.password}
+                                                            value={this.state.formData.password}
                                                             onChange={(e) => {
                                                                 let formDataOb = this.state.formData
-                                                                this.state.formData.user.password = e.target.value
+                                                                formDataOb.password = e.target.value
                                                                 this.setState(formDataOb)
                                                             }}
                                                             validators={['required']}
@@ -167,6 +351,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.address.city}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.address.city = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -178,6 +368,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.address.street}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.address.street = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -189,6 +385,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.address.number}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.address.number = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -200,6 +402,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.address.zipcode}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.address.zipcode = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -212,6 +420,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.address.geolocation.lat}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.address.geolocation.lat = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -223,6 +437,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.address.geolocation.long}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.address.geolocation.long = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -234,6 +454,12 @@ class UserRegistration extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.phone}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.phone = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -241,15 +467,21 @@ class UserRegistration extends Component {
 
                                                 </div>
 
-                                                <Grid width={'97%'}  marginTop={'5vh'} marginRight={'10vw'} display={"flex"} justifyContent={"flex-end"}>
+                                                <Grid width={'97%'} marginTop={'5vh'} marginRight={'10vw'}
+                                                      display={"flex"} justifyContent={"flex-end"}>
 
-                                                    <Grid width={'30%'}   display={"flex"} alignItems={"center"}>
+                                                    <Grid width={'30%'} display={"flex"} alignItems={"center"}>
 
                                                         <MyButton label={"cancel"}
-                                                                  variant={'contained'} type={"submit"} style={{backgroundColor:'silver',width:'45%',margin:'1vh'}} />
+                                                                  variant={'contained'}  style={{
+                                                            backgroundColor: 'silver',
+                                                            width: '45%',
+                                                            margin: '1vh'
+                                                        }}/>
 
                                                         <MyButton color={'success'} label={"Save"}
-                                                                  variant={'contained'} type={"submit"} style={{width:'45%',margin:'1vh'}} />
+                                                                  variant={'contained'} type="submit"
+                                                                  style={{width: '45%', margin: '1vh'}}/>
 
 
                                                     </Grid>
@@ -274,9 +506,8 @@ class UserRegistration extends Component {
                     </Box>
 
 
-
                     <Grid>
-                        <TableContainer component={Paper} style={{ width:'90vw', backgroundColor: '#eeeff1' }}>
+                        <TableContainer component={Paper} style={{width: '90vw', backgroundColor: '#eeeff1'}}>
                             <Table aria-label="simple table">
                                 <TableHead>
                                     <TableRow>
@@ -296,38 +527,29 @@ class UserRegistration extends Component {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                  {/*  {
-                                        this.state.data.map((row) => (
+                                      {
+                                        this.state.all.map((row) => (
                                             <TableRow onClick={() => {
-                                                this.loadVehicleData(row);
+                                                this.loadUser(/*row.id*/);
                                             }}>
-                                                <TableCell align="left">{row.vehicleId}</TableCell>
-                                                <TableCell align="left">{row.registrationNo}</TableCell>
-                                                <TableCell align="left">{row.color}</TableCell>
-                                                <TableCell align="left">{row.brand}</TableCell>
-                                                <TableCell align="left">{row.noOfPassengers}</TableCell>
-                                                <TableCell align="left">{row.color}</TableCell>
-                                                <TableCell align="left">{row.vehicleType}</TableCell>
-                                                <TableCell align="left">{row.transmissionType}</TableCell>
-                                                <TableCell align="left">{row.pricePerExtraKM}</TableCell>
-                                                <TableCell align="left">{row.vehicleAvailability}</TableCell>
-                                                <TableCell align="left">{row.refundableDamageFee}</TableCell>
-                                                <TableCell align="left">{row.mileage}</TableCell>
-                                                <TableCell align="left">{row.lastServiceMileage}</TableCell>
-                                                <TableCell align="left">{row.priceRate.dailyRate}</TableCell>
-                                                <TableCell align="left">{row.priceRate.monthlyRate}</TableCell>
-                                                <TableCell align="left">{row.freeMileage.dailyFreeMileage}</TableCell>
-                                                <TableCell align="left">{row.freeMileage.monthlyFreeMileage}</TableCell>
-
-
-
-
+                                                <TableCell align="left">{row.name.firstname}</TableCell>
+                                                <TableCell align="left">{row.name.lastname}</TableCell>
+                                                <TableCell align="left">{row.email}</TableCell>
+                                                <TableCell align="left">{row.username}</TableCell>
+                                                <TableCell align="left">{row.password}</TableCell>
+                                                <TableCell align="left">{row.address.city}</TableCell>
+                                                <TableCell align="left">{row.address.street}</TableCell>
+                                                <TableCell align="left">{row.address.number}</TableCell>
+                                                <TableCell align="left">{row.address.zipcode}</TableCell>
+                                                <TableCell align="left">{row.address.lat}</TableCell>
+                                                <TableCell align="left">{row.address.long}</TableCell>
+                                                <TableCell align="left">{row.phone}</TableCell>
 
                                                 <TableCell align="left">
                                                     <Tooltip title="Edit">
                                                         <IconButton
                                                             onClick={() => {
-                                                                //this.updateVehicle(row);
+                                                                this.updateUser(row);
                                                             }}
                                                         >
                                                             <EditIcon color="primary" />
@@ -336,7 +558,7 @@ class UserRegistration extends Component {
                                                     <Tooltip title="Delete">
                                                         <IconButton
                                                             onClick={() => {
-                                                                this.deleteVehicle(row.vehicleId)
+                                                                this.deleteUser(/*row.id*/)
                                                             }}
                                                         >
                                                             <DeleteIcon color="error" />
@@ -345,7 +567,7 @@ class UserRegistration extends Component {
                                                 </TableCell>
                                             </TableRow>
                                         ))
-                                    }*/}
+                                    }
                                 </TableBody>
                             </Table>
                         </TableContainer>

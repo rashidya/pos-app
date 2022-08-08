@@ -31,7 +31,7 @@ class LogInIndex extends Component {
 
         let res = await LogInService.postUser(this.state.formData)
 
-        if (res.status === 200) {
+        if (res.status === 204) {
             this.setState({
                 link: '/dashBoard',
                 alert: true,

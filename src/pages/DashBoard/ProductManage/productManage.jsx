@@ -31,37 +31,181 @@ import Paper from '@mui/material/Paper';
 import Button from "@mui/material/Button";
 import * as React from "react";
 import UploadButton from "../../../component/Common/UploadButton";
+import userRegistrationService from "../../../services/userRegistrationService";
+import productManageService from "../../../services/productManageService";
 
 class ProductManage extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-
-
             formData: {
-                id: '',
-                userNIC: '',
-                name: {
-                    firstName: '',
-                    lastName: ''
-                },
-                email: '',
-                drivingLicenseNo: '',
-                address: '',
-                contactNo: '',
-                user: {
-                    userId: '',
-                    userName: '',
-                    password: '',
-                    role: 'REGISTERED_USER'
-                }
-
+                title: "test product",
+                price: 13.5,
+                description: "lorem ipsum set",
+                image: "https://i.pravatar.cc",
+                category: "electronic"
             },
 
-            category:[]
+            allProducts:[]
         }
     }
+
+
+
+    submitProduct= async() =>{
+
+        let formData = this.state.formData;
+        let res = await productManageService.submitProduct(formData);
+
+        if (res.status === 200) {
+            this.setState({
+                alert: true,
+                message: res.data.message,
+                severity: 'success'
+            });
+            await this.loadAllProducts();
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    updateProduct= async(data) =>{
+
+        let res = await productManageService.putProduct(data.id,data);
+
+        if (res.status === 200) {
+            this.setState({
+                alert: true,
+                message: res.data.message,
+                severity: 'success'
+            });
+            await this.loadAllUsers();
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    deleteProduct= async(data) =>{
+
+        let res = await productManageService.deleteProduct(data);
+
+        if (res.status === 200) {
+            this.setState({
+                alert: true,
+                message: res.data.message,
+                severity: 'success'
+            });
+            await this.loadAllUsers();
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    loadAllProducts= async() =>{
+
+        let res = await productManageService.fetchAllProducts();
+
+        if (res.status === 200) {
+            this.setState({
+                allProducts:res.data.data,
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    loadAllProductsCategories= async() =>{
+
+        let res = await productManageService.fetchAllProductsCategories();
+
+        if (res.status === 200) {
+            this.setState({
+                allProducts:res.data.data,
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    loadProduct= async() =>{
+
+        // let data = this.state.id;
+        let res = await productManageService.fetchASingleProduct(/*data*/);
+
+        if (res.status === 200) {
+            let data = res.data.data;
+            this.setState({
+
+                formData: {
+                    title: data.title,
+                    price: data.price,
+                    description:data.description,
+                    image:data.image,
+                    category: data.category
+                },
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    loadUsersLimit= async() =>{
+
+        // let data = this.state.limit;
+        let res = await productManageService.fetchAllProductsLimit(/*data*/);
+
+        if (res.status === 200) {
+            this.setState({
+                allUsers:res.data.data,
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+    componentDidMount() {
+        this.loadAllProducts();
+    }
+
+
+
+
 
     render() {
         const {classes} = this.props;
@@ -86,7 +230,7 @@ class ProductManage extends Component {
                                           alignItems={'center'} marginTop={'5vh'}>
 
                                         <Grid display={'flex'} height={'100%'}>
-                                            <ValidatorForm ref="form" className="pt-2">
+                                            <ValidatorForm ref="form" className="pt-2" onSubmit={this.submitProduct}>
                                                 <div style={{
                                                     display: 'flex',
                                                     flexWrap: 'wrap',
