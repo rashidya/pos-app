@@ -12,22 +12,55 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-
-
-import MyButton from "../../component/Common/Button";
+import {Link} from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
+import MyButton from "../../../component/Common/Button";
 import {TextValidator, ValidatorForm} from "react-material-ui-form-validator";
-import SnackBar from "../../component/Common/snackBar";
+import SnackBar from "../../../component/Common/snackBar";
+import TableContainer from "@mui/material/TableContainer";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import {TableCell} from "@material-ui/core";
+import TableBody from "@mui/material/TableBody";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import Paper from '@mui/material/Paper';
+import Button from "@mui/material/Button";
 import * as React from "react";
-import DatePicker from "../../component/Common/DatePicker";
+import UploadButton from "../../../component/Common/UploadButton";
 
-class CartManage extends Component {
+class ProductManage extends Component {
     constructor(props) {
         super(props);
 
-        this.state={
-            productTitle:''
-        }
+        this.state = {
 
+
+            formData: {
+                id: '',
+                userNIC: '',
+                name: {
+                    firstName: '',
+                    lastName: ''
+                },
+                email: '',
+                drivingLicenseNo: '',
+                address: '',
+                contactNo: '',
+                user: {
+                    userId: '',
+                    userName: '',
+                    password: '',
+                    role: 'REGISTERED_USER'
+                }
+
+            },
+
+            category:[]
+        }
     }
 
     render() {
@@ -46,11 +79,11 @@ class CartManage extends Component {
                                       flexDirection={'column'} alignItems={'center'}>
 
                                     <Grid width={'92%'} display={'flex'} justifyContent={'start'}><Typography
-                                        marginBottom={'2vh'} style={{fontSize: '35px',}}>Cart
+                                        marginBottom={'2vh'} style={{fontSize: '35px',}}>Product
                                         Manage</Typography></Grid>
 
                                     <Grid display={"flex"} justifyContent={'center'} height={'75vh'}
-                                          alignItems={'center'} marginTop={'10vh'}>
+                                          alignItems={'center'} marginTop={'5vh'}>
 
                                         <Grid display={'flex'} height={'100%'}>
                                             <ValidatorForm ref="form" className="pt-2">
@@ -63,7 +96,7 @@ class CartManage extends Component {
                                                     <TextField
                                                         required
                                                         id="outlined-required"
-                                                        label="Username"
+                                                        label="Titlle"
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
@@ -92,29 +125,83 @@ class CartManage extends Component {
 
                                                         onChange={(e, value, r) => {
 
+                                                            let formData = this.state.formData
+
+                                                            formData.user.role = value.type
+
+                                                            this.setState({formData})
+
                                                         }}
                                                         getOptionLabel={
                                                             (option) => option.type
                                                         }
                                                         id="controllable-states-demo"
-                                                        options={this.state.productTitle}
+                                                        options={this.state.category}
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
-                                                        renderInput={(params) => <TextField {...params} label="Product Title" margin={'1vh'}/>}
+                                                        renderInput={(params) => <TextField {...params} label="Category"/>}
                                                     />
 
 
 
 
-                                                    <DatePicker label={'Date'}/>
+                                                    <TextField
+                                                        required
+                                                        id="outlined-required"
+                                                        label="City"
+                                                        defaultValue=""
+                                                        sx={{m: 1, width: '60ch'}}
+                                                        size={"small"}
+                                                        multiline
+                                                        rows={4}
+                                                        validators={['required']}
+
+                                                    />
 
                                                 </div>
 
 
+                                                <Grid width={'100%'} height={'40%'} >
+                                                    <Grid style={{
+                                                        width: '40ch',
+                                                        height:'30ch',
+                                                        margin: '1vh',
+                                                        marginLeft:'10vw',
+                                                        border: '1px solid silver',
+
+                                                        backgroundImage:"url(" +this.state.nicView+ ")",
+                                                        backgroundSize: 'cover'
+
+                                                    }}>
+                                                        <div style={{backgroundColor:'silver',display:'flex',justifyContent:'center'}}><input
+
+                                                            style={{display: 'none'}}
+                                                            accept="image/*"
+                                                            //className={classes.input}
+                                                            id="contained-button-file01"
+                                                            multiple
+                                                            type="file"
+                                                            onChange={(e) => {
+                                                                this.setState({
+                                                                    nicImage: e.target.files[0],
+                                                                    nicView : URL.createObjectURL(e.target.files[0])
+                                                                })
+                                                            }}
+                                                        />
+                                                            <label htmlFor="contained-button-file01">
+                                                                <Button variant="text" color="primary" size="small" component="span">
+                                                                    <UploadButton/> Upload Image
+                                                                </Button>
+                                                            </label>
+
+                                                        </div>
+                                                    </Grid>
 
 
+                                                </Grid>
 
-                                                <Grid width={'97%'} marginTop={'15vh'} marginRight={'10vw'}
+
+                                                <Grid width={'97%'} marginTop={'5vh'} marginRight={'10vw'}
                                                       display={"flex"} justifyContent={"flex-end"}>
 
                                                     <Grid width={'30%'} display={"flex"} alignItems={"center"}>
@@ -175,4 +262,4 @@ class CartManage extends Component {
     }
 }
 
-export default withStyles(styleSheet)(CartManage)
+export default withStyles(styleSheet)(ProductManage)
