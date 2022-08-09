@@ -6,32 +6,16 @@ import {
     Box,
     FormControl,
     Grid,
-    InputAdornment,
-    InputLabel,
-    OutlinedInput,
     TextField,
     Typography
 } from "@mui/material";
-import {Link} from "react-router-dom";
-import IconButton from "@mui/material/IconButton";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Visibility from "@mui/icons-material/Visibility";
 import MyButton from "../../../component/Common/Button";
 import {TextValidator, ValidatorForm} from "react-material-ui-form-validator";
 import SnackBar from "../../../component/Common/snackBar";
-import TableContainer from "@mui/material/TableContainer";
-import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import {TableCell} from "@material-ui/core";
-import TableBody from "@mui/material/TableBody";
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import Paper from '@mui/material/Paper';
 import Button from "@mui/material/Button";
 import * as React from "react";
 import UploadButton from "../../../component/Common/UploadButton";
-import userRegistrationService from "../../../services/userRegistrationService";
+
 import productManageService from "../../../services/productManageService";
 
 class ProductManage extends Component {
@@ -39,15 +23,18 @@ class ProductManage extends Component {
         super(props);
 
         this.state = {
+            allProducts:[],
+            categories:[],
+            view:'',
             formData: {
-                title: "test product",
-                price: 13.5,
-                description: "lorem ipsum set",
-                image: "https://i.pravatar.cc",
-                category: "electronic"
-            },
+                title: '',
+                price: '',
+                description: '',
+                image:'',
+                category: ''
+            }
 
-            allProducts:[]
+
         }
     }
 
@@ -64,12 +51,12 @@ class ProductManage extends Component {
                 message: res.data.message,
                 severity: 'success'
             });
-            await this.loadAllProducts();
+
 
         } else {
             this.setState({
                 alert: true,
-                message: res.response.data.message,
+                message: res.response.message,
                 severity: 'error'
             });
         }
@@ -117,32 +104,18 @@ class ProductManage extends Component {
         }
     }
 
-    loadAllProducts= async() =>{
-
-        let res = await productManageService.fetchAllProducts();
-
-        if (res.status === 200) {
-            this.setState({
-                allProducts:res.data.data,
-            });
-
-        } else {
-            this.setState({
-                alert: true,
-                message: res.response.data.message,
-                severity: 'error'
-            });
-        }
-    }
 
     loadAllProductsCategories= async() =>{
 
         let res = await productManageService.fetchAllProductsCategories();
 
+
         if (res.status === 200) {
+
             this.setState({
-                allProducts:res.data.data,
+                categories:res.data,
             });
+
 
         } else {
             this.setState({
@@ -200,7 +173,8 @@ class ProductManage extends Component {
     }
 
     componentDidMount() {
-        this.loadAllProducts();
+        this.loadAllProductsCategories();
+
     }
 
 
@@ -240,16 +214,16 @@ class ProductManage extends Component {
                                                     <TextField
                                                         required
                                                         id="outlined-required"
-                                                        label="Titlle"
+                                                        label="Title"
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
-                                                        /*value={this.state.formData.name.firstName}
+                                                        value={this.state.formData.title}
                                                         onChange={(e) => {
                                                             let formDataOb = this.state.formData
-                                                            formDataOb.name.firstName = e.target.value
+                                                            formDataOb.title = e.target.value
                                                             this.setState(formDataOb)
-                                                        }}*/
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -261,30 +235,40 @@ class ProductManage extends Component {
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
+                                                        value={this.state.formData.price}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.price = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
 
-                                                    <Autocomplete
+                                                    <Grid>
 
-                                                        onChange={(e, value, r) => {
+                                                        <Autocomplete
 
-                                                            let formData = this.state.formData
+                                                            onChange={(e, value, r) => {
 
-                                                            formData.user.role = value.type
+                                                                let formData = this.state.formData
 
-                                                            this.setState({formData})
+                                                                formData.category = value
 
-                                                        }}
-                                                        getOptionLabel={
-                                                            (option) => option.type
-                                                        }
-                                                        id="controllable-states-demo"
-                                                        options={this.state.category}
-                                                        sx={{m: 1, width: '60ch'}}
-                                                        size={"small"}
-                                                        renderInput={(params) => <TextField {...params} label="Category"/>}
-                                                    />
+                                                                this.setState({formData})
+
+                                                            }}
+                                                            getOptionLabel={
+                                                                (option) => option
+                                                            }
+
+                                                            options={this.state.categories}
+                                                            sx={{m: 1, width: '60ch'}}
+                                                            size={"small"}
+                                                            renderInput={(params) => <TextField {...params} label="Category"/>}
+                                                        />
+                                                    </Grid>
+
 
 
 
@@ -292,12 +276,18 @@ class ProductManage extends Component {
                                                     <TextField
                                                         required
                                                         id="outlined-required"
-                                                        label="City"
+                                                        label="Description"
                                                         defaultValue=""
                                                         sx={{m: 1, width: '60ch'}}
                                                         size={"small"}
                                                         multiline
                                                         rows={4}
+                                                        value={this.state.formData.description}
+                                                        onChange={(e) => {
+                                                            let formDataOb = this.state.formData
+                                                            formDataOb.description = e.target.value
+                                                            this.setState(formDataOb)
+                                                        }}
                                                         validators={['required']}
 
                                                     />
@@ -313,7 +303,7 @@ class ProductManage extends Component {
                                                         marginLeft:'10vw',
                                                         border: '1px solid silver',
 
-                                                        backgroundImage:"url(" +this.state.nicView+ ")",
+                                                        backgroundImage:"url(" +this.state.view+ ")",
                                                         backgroundSize: 'cover'
 
                                                     }}>
@@ -327,9 +317,12 @@ class ProductManage extends Component {
                                                             type="file"
                                                             onChange={(e) => {
                                                                 this.setState({
-                                                                    nicImage: e.target.files[0],
-                                                                    nicView : URL.createObjectURL(e.target.files[0])
+                                                                    view : URL.createObjectURL(e.target.files[0])
                                                                 })
+                                                                let formData=this.state.formData;
+                                                                formData.image= e.target.files[0];
+                                                                this.setState(formData)
+
                                                             }}
                                                         />
                                                             <label htmlFor="contained-button-file01">

@@ -4,6 +4,9 @@ import {Grid} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {Avatar, Button, Tab, Tabs} from "@mui/material";
 import ResponsiveAppBar from "../../../component/Common/AppBar/appbar";
+import cartManageService from "../../../services/cartManageService";
+import productManageService from "../../../services/productManageService";
+import userRegistrationService from "../../../services/userRegistrationService";
 
 
 class DashBoard extends Component {
@@ -14,17 +17,9 @@ class DashBoard extends Component {
 
         this.state = {
             value:'Product',
-            dashBoardSummery: {
-                noOfRegisteredUsers: '',
-                noOfBookingsForToday: '',
-                noOfAvailableCars: '',
-                noOfReservedCars: '',
-                noOfActiveBookings: '',
-                noOfAvailableDrivers: '',
-                noOfOccupiedDrivers: '',
-                noOfCarsNeedMaintenance: '',
-                noOfCarsNeedToBeRepaired: ''
-            },
+            users:[],
+            products:[],
+            carts:[]
 
 
         }
@@ -32,10 +27,31 @@ class DashBoard extends Component {
 
 
 
-    handleChange = (event,newValue) => {
-        this.setState({
-            value:newValue
-        })
+    loadDashBoard = async () => {
+
+        let res = await cartManageService.fetchAllCarts();
+        let res1 = await productManageService.fetchAllProducts();
+        let res2 = await userRegistrationService.fetchAllUsers();
+
+        if (res.status === 200 && res2.status === 200 && res2.status === 200) {
+            this.setState({
+                carts: res.data,
+                users:res2.data,
+                products:res1.data
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+
+    componentDidMount() {
+        this.loadDashBoard();
     }
 
     render() {
@@ -61,7 +77,7 @@ class DashBoard extends Component {
                         <Grid height={"70%"} style={{backgroundColor: '#F8F8F8'}} display={"flex"} alignItems={'center'}
                               justifyContent={'center'}>
                             <Typography
-                                style={{fontSize: '60px'}}>{this.state.dashBoardSummery.noOfRegisteredUsers}</Typography>
+                                style={{fontSize: '60px'}}>{this.state.products.length}</Typography>
                         </Grid>
 
 
@@ -77,7 +93,7 @@ class DashBoard extends Component {
                         <Grid height={"70%"} style={{backgroundColor: '#F8F8F8'}} display={"flex"} alignItems={'center'}
                               justifyContent={'center'}>
                             <Typography
-                                style={{fontSize: '60px'}}>{this.state.dashBoardSummery.noOfBookingsForToday}</Typography>
+                                style={{fontSize: '60px'}}>{this.state.carts.length}</Typography>
                         </Grid>
 
 
@@ -93,7 +109,7 @@ class DashBoard extends Component {
                         <Grid height={"70%"} style={{backgroundColor: '#F8F8F8'}} display={"flex"} alignItems={'center'}
                               justifyContent={'center'}>
                             <Typography
-                                style={{fontSize: '60px'}}>{this.state.dashBoardSummery.noOfAvailableCars}</Typography>
+                                style={{fontSize: '60px'}}>{this.state.users.length}</Typography>
                         </Grid>
 
 

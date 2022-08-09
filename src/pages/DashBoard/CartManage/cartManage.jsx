@@ -18,16 +18,18 @@ import MyButton from "../../../component/Common/Button";
 import {TextValidator, ValidatorForm} from "react-material-ui-form-validator";
 import SnackBar from "../../../component/Common/snackBar";
 import * as React from "react";
-import DatePicker from "../../../component/Common/DatePicker";
+import DatePicker from "../../../component/Common/DatePicker/datepicker";
 import productManageService from "../../../services/productManageService";
 import cartManageService from "../../../services/cartManageService";
+import userRegistrationService from "../../../services/userRegistrationService";
 
 class CartManage extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            productTitle: '',
+            productTitle: [],
+            users:[],
             formData: {
                 userId: '',
                 date: '',
@@ -36,6 +38,7 @@ class CartManage extends Component {
         }
 
     }
+
 
 
     submitCart = async () => {
@@ -102,23 +105,6 @@ class CartManage extends Component {
         }
     }
 
-    loadAllCarts = async () => {
-
-        let res = await cartManageService.fetchAllCarts();
-
-        if (res.status === 200) {
-            this.setState({
-                allProducts: res.data.data,
-            });
-
-        } else {
-            this.setState({
-                alert: true,
-                message: res.response.data.message,
-                severity: 'error'
-            });
-        }
-    }
 
     loadCart = async () => {
 
@@ -164,8 +150,46 @@ class CartManage extends Component {
         }
     }
 
+    loadAllProducts= async() =>{
+
+        let res = await productManageService.fetchAllProducts();
+
+        if (res.status === 200) {
+            this.setState({
+                productTitle:res.data,
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
+
+
+    loadAllUsers= async() =>{
+
+        let res = await userRegistrationService.fetchAllUsers();
+
+        if (res.status === 200) {
+            this.setState({
+                users:res.data,
+            });
+
+        } else {
+            this.setState({
+                alert: true,
+                message: res.response.data.message,
+                severity: 'error'
+            });
+        }
+    }
     componentDidMount() {
-        this.loadAllCarts();
+        this.loadAllUsers();
+        this.loadAllProducts();
+
     }
 
 
@@ -199,21 +223,21 @@ class CartManage extends Component {
                                                 justifyContent: 'center'
                                             }}>
 
-                                                <TextField
-                                                    required
-                                                    id="outlined-required"
-                                                    label="Username"
-                                                    defaultValue=""
+                                                <Autocomplete
+
+                                                    onChange={(e, value, r) => {
+
+                                                    }}
+                                                    getOptionLabel={
+                                                        (option) => option.username
+                                                    }
+                                                    id="controllable-states-demo"
+                                                    options={this.state.users}
                                                     sx={{m: 1, width: '60ch'}}
                                                     size={"small"}
-                                                    /*value={this.state.formData.name.firstName}
-                                                    onChange={(e) => {
-                                                        let formDataOb = this.state.formData
-                                                        formDataOb.name.firstName = e.target.value
-                                                        this.setState(formDataOb)
-                                                    }}*/
-                                                    validators={['required']}
-
+                                                    renderInput={(params) => <TextField {...params}
+                                                                                        label="Username"
+                                                                                        margin={'1vh'}/>}
                                                 />
 
                                                 <TextField
@@ -233,7 +257,7 @@ class CartManage extends Component {
 
                                                     }}
                                                     getOptionLabel={
-                                                        (option) => option.type
+                                                        (option) => option.title
                                                     }
                                                     id="controllable-states-demo"
                                                     options={this.state.productTitle}

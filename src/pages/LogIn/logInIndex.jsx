@@ -31,15 +31,15 @@ class LogInIndex extends Component {
 
         let res = await LogInService.postUser(this.state.formData)
 
-        if (res.status === 204) {
+        if (res.status === 200) {
             this.setState({
                 link: '/dashBoard',
                 alert: true,
-                message: res.data.data.message,
+                message: res.data.message,
                 severity: 'success'
             });
 
-
+            console.log(this.state.link)
         } else {
             this.setState({
                 alert: true,
@@ -128,7 +128,7 @@ class LogInIndex extends Component {
 
                                     <Grid width={'20vw'}>
 
-                                        <MyButton style={{margin: '1vh', marginTop: '4vh'}} href={this.state.link}
+                                        <MyButton href={this.state.link} style={{margin: '1vh', marginTop: '4vh'}}
                                                   color={'success'} label={"Log In"}
                                                   variant={'contained'} type={"submit"} fullWidth={true}/>
 
